@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Button, TextInput } from 'react-native';
 import React, { useState } from 'react';
 import styles from './Home-style';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import LottieView from 'lottie-react-native';
 export default function Main() {
   const [inputText, setInputText] = useState('');
   const [displayText, setDisplayText] = useState('');
@@ -12,10 +13,16 @@ export default function Main() {
   return (
     <View style={styles.container}>
       <View>
-        <MaterialIcons name="home" size={50} color={'red'} />
-        <Text style={{ fontSize: 50, color: '#232323', fontWeight: 'bold' }}>
+        <LottieView
+          source={require('../../assets/lottie/hello_anim.json')}
+          style={{ width: 200, height: 200 }}
+          autoPlay
+          loop
+        />
+        {/* <MaterialIcons name="home" size={50} color={'red'} /> */}
+        {/* <Text style={{ fontSize: 50, color: '#232323', fontWeight: 'bold' }}>
           Hello World!
-        </Text>
+        </Text> */}
       </View>
       {/* <View style={styles.textContainer}>
         <Text style={styles.text}>Username</Text>

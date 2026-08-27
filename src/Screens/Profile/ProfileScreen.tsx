@@ -21,32 +21,40 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useIsFocused } from '@react-navigation/native';
 import { Controller, useForm } from 'react-hook-form';
 import ProfileScreenStyle from './profilescreen-style';
-import FastImage from 'react-native-fast-image';
+
+const profileSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, 'First name is required')
+    .max(50, 'First name must be at most 50 characters'),
+  lastName: z
+    .string()
+    .min(1, 'Last name is required')
+    .max(50, 'Last name must be at most 50 characters'),
+  phoneNumber: z
+    .string()
+    .min(1, 'Phone number is required')
+    .regex(/^\+?[0-9\s\-()]+$/, 'Please enter a valid phone number'),
+});
+type ProfileForm = z.infer<typeof profileSchema>;
+
+// import FastImage from 'react-native-fast-image';
 export default function ProfileScreen() {
-  const profileSchema = z.object({
-    firstName: z
-      .string()
-      .min(1, 'First name is required')
-      .max(50, 'First name must be at most 50 characters'),
-    lastName: z
-      .string()
-      .min(1, 'Last name is required')
-      .max(50, 'Last name must be at most 50 characters'),
-    phoneNumber: z
-      .string()
-      .min(1, 'Phone number is required')
-      .regex(/^\+?[0-9\s\-()]+$/, 'Please enter a valid phone number'),
-  });
   const { me, updateProfile } = useProfile();
   const [loading, setLoading] = useState(true);
   const isFocused = useIsFocused();
-
-  type ProfileForm = z.infer<typeof profileSchema>;
+  const [image, setImage] = useState(null);
+  const navigation = useNavigation<Nav>();
+  const userData = mmkvStorage.getString(USER.USER_DATA)
+    ? JSON.parse(mmkvStorage.getString(USER.USER_DATA) || '')
+    : null;
+  const { logout } = useAuth();
 
   const {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -56,7 +64,8 @@ export default function ProfileScreen() {
       phoneNumber: '',
     },
   });
-
+  const firstName = watch('firstName');
+  const lastName = watch('lastName');
   const fetchProfile = useCallback(async () => {
     setLoading(true);
     const data = await me();
@@ -85,6 +94,18 @@ export default function ProfileScreen() {
     }
   };
 
+  console.log(userData);
+
+  const handleLogout = async () => {
+    const result = await logout();
+    console.log(result);
+    if (result.success) {
+      navigation.navigate('SplashScreen', {});
+      // mmkvStorage.clearAll();
+      mmkvStorage.remove(USER.ACCESS_TOKEN);
+      mmkvStorage.remove(USER.USER_DATA);
+    }
+  };
   if (loading) {
     return (
       <View style={ProfileScreenStyle.container}>
@@ -92,17 +113,7 @@ export default function ProfileScreen() {
       </View>
     );
   }
-  const navigation = useNavigation<Nav>();
-  const userData = JSON.parse(mmkvStorage.getString(USER.USER_DATA) || '');
-  const { logout } = useAuth();
-  console.log(userData);
-  const handleLogout = async () => {
-    const result = await logout();
-    console.log(result);
-    if (result.success) {
-      navigation.navigate('SplashScreen', {});
-    }
-  };
+  const handleUpload = async () => {};
   return (
     <View style={ProfileScreenStyle.container}>
       <Text style={ProfileScreenStyle.title}>Profile</Text>
@@ -131,26 +142,28 @@ export default function ProfileScreen() {
             borderColor: '#E5E7EB',
           }}
         >
-          <Image
-            source={require('../../assets/images/avatar.jpg')}
-            style={{
-              width: '100%',
-              height: '100%',
-            }}
-          />
+          <View
+            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Image
+              source={require('../../assets/images/avatar.jpg')}
+              style={{ width: 100, height: 100 }}
+            />
+          </View>
         </View>
 
         {/* Actions */}
         <View style={{ flex: 1, gap: 10 }}>
           <Text
             style={{
-              fontSize: 16,
-              fontWeight: '600',
+              fontSize: 18,
+              fontWeight: 'bold',
               color: '#111827',
-              marginBottom: 2,
+              // marginBottom: 1,
+              textTransform: 'uppercase',
             }}
           >
-            Profile Photo
+            {firstName} {lastName}
           </Text>
 
           <Text
@@ -289,6 +302,22 @@ export default function ProfileScreen() {
         <Text style={ProfileScreenStyle.buttonText}>
           {isSubmitting ? 'Saving...' : 'Save Profile'}
         </Text>
+      </TouchableHighlight>
+
+      <TouchableHighlight
+        style={{
+          padding: 15,
+          marginTop: 10,
+          borderWidth: 1,
+          borderColor: 'red',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 8,
+        }}
+        onPress={handleLogout}
+        // disabled={isSubmitting}
+      >
+        <Text style={{ color: 'red' }}>Sign-Out</Text>
       </TouchableHighlight>
     </View>
   );
