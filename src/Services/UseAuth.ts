@@ -1,9 +1,5 @@
-// import { API } from '../lib/config/api';
 import Toast from 'react-native-simple-toast';
-// import api from '../lib/axios';
 import api from '../Lib/axios/axios';
-// import { mmkvStorage } from '../lib/storage/mmkv';
-// import { USER } from '../lib/config/user';
 import { API } from '../Config/api';
 import { mmkvStorage } from '../Storage/mmkv';
 import { USER } from '../Config/constant/user';
@@ -34,7 +30,7 @@ export function useAuth() {
     email: string;
   }) => {
     try {
-      const response = await api.post(`${API.API_URL}/employee/register`, {
+      const response = await api.post(`/employee/register`, {
         first_name,
         last_name,
         email,
@@ -59,7 +55,7 @@ export function useAuth() {
 
   const me = async () => {
     try {
-      const response = await api.get(`${API.API_URL}/employee/me`);
+      const response = await api.get(`/employee/me`);
       return response.data;
     } catch (error: any) {
       console.log('error', error.response);
@@ -94,7 +90,7 @@ export function useAuth() {
   // Logout
   const logout = async () => {
     try {
-      const response = await api.get(`${API.API_URL}/auth/logout`);
+      const response = await api.get(`/auth/logout`);
       return response.data;
     } catch (error: any) {
       console.log(error);

@@ -39,8 +39,8 @@ const SigninScreen = () => {
   } = useForm<SignInForm>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: 'jeov@example.com',
+      password: 'P@ssw0rd',
     },
   });
 
